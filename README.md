@@ -145,7 +145,7 @@ Each widget can be configured through Strapi or directly in code:
 
 ```typescript
 const widgetConfig = {
-  name: "@widget-library/hero-banner",
+  name: "@widget-library/core",
   version: "1.0.0",
   configuration: {
     title: "Welcome to Our Platform",
@@ -297,8 +297,7 @@ Key configuration in `next.config.ts`:
 ```typescript
 {
   transpilePackages: [
-    '@widget-library/core',
-    '@widget-library/hero-banner'
+    '@widget-library/core'
   ],
   images: {
     domains: ['your-strapi-domain.com']
@@ -337,7 +336,7 @@ When widgets are published, GitHub Actions automatically:
 
 ```bash
 # Update specific widget
-npm install @widget-library/hero-banner@latest
+npm install @widget-library/core@latest
 
 # Update all widgets
 npm update @widget-library/*

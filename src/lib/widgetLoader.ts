@@ -112,7 +112,7 @@ export class WidgetRegistry {
 
   /**
    * Convert package name to global variable name
-   * @example @widget-library/hero-banner -> WidgetLibraryHeroBanner
+   * @example @widget-library/core -> WidgetLibraryCore
    */
   private getGlobalName(packageName: string): string {
     return packageName
