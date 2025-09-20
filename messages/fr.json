@@ -1,0 +1,47 @@
+{
+  "navigation": {
+    "home": "Accueil",
+    "about": "À propos",
+    "contact": "Contact",
+    "dashboard": "Tableau de bord"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "retry": "Réessayer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent"
+  },
+  "widgets": {
+    "title": "Widgets",
+    "noWidgetsFound": "Aucun widget trouvé",
+    "loadingWidget": "Chargement du widget...",
+    "widgetError": "Échec du chargement du widget",
+    "embedWidget": "Intégrer le Widget"
+  },
+  "layout": {
+    "header": "Shell Web",
+    "footer": "© 2024 Shell Web. Tous droits réservés.",
+    "sidebar": {
+      "title": "Menu",
+      "widgets": "Widgets",
+      "settings": "Paramètres"
+    }
+  },
+  "pages": {
+    "home": {
+      "title": "Bienvenue dans Shell Web",
+      "subtitle": "Une plateforme puissante pour l'intégration de widgets"
+    },
+    "widgets": {
+      "title": "Galerie de Widgets",
+      "description": "Explorez et intégrez des widgets dans vos pages"
+    }
+  }
+}

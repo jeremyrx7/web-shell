@@ -1,0 +1,47 @@
+{
+  "navigation": {
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact",
+    "dashboard": "Dashboard"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "widgets": {
+    "title": "Widgets",
+    "noWidgetsFound": "No widgets found",
+    "loadingWidget": "Loading widget...",
+    "widgetError": "Failed to load widget",
+    "embedWidget": "Embed Widget"
+  },
+  "layout": {
+    "header": "Web Shell",
+    "footer": "© 2024 Web Shell. All rights reserved.",
+    "sidebar": {
+      "title": "Menu",
+      "widgets": "Widgets",
+      "settings": "Settings"
+    }
+  },
+  "pages": {
+    "home": {
+      "title": "Welcome to Web Shell",
+      "subtitle": "A powerful platform for widget integration"
+    },
+    "widgets": {
+      "title": "Widget Gallery",
+      "description": "Explore and embed widgets into your pages"
+    }
+  }
+}
