@@ -86,6 +86,7 @@ jobs:
         env:
           PACKAGES_TO_UPDATE: ${{ steps.extract-packages.outputs.packages }}
           FORCE_UPDATE: ${{ github.event.inputs.force_update || 'false' }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           node scripts/update-widget-dependencies.js
 

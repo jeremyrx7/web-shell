@@ -29,6 +29,9 @@ class WidgetDependencyUpdater {
    */
   async run() {
     try {
+      // Configure npm authentication first
+      await this.configureNpmAuth();
+
       // Get input data from environment variables
       const packagesToUpdate = this.getPackagesToUpdate();
       const forceUpdate = process.env.FORCE_UPDATE === "true";
@@ -83,6 +86,46 @@ class WidgetDependencyUpdater {
       });
       this.outputResults();
       process.exit(1);
+    }
+  }
+
+  /**
+   * Configure npm authentication using npm config commands
+   */
+  async configureNpmAuth() {
+    const npmToken = process.env.NPM_TOKEN;
+
+    console.log("🔑 Configuring npm authentication...");
+
+    if (!npmToken) {
+      console.log(
+        "⚠️  NPM_TOKEN not found - continuing without authentication",
+      );
+      return;
+    }
+
+    try {
+      // Configure registry for @jeremyrx7 scope
+      execSync(
+        "npm config set @jeremyrx7:registry https://npm.pkg.github.com",
+        {
+          stdio: ["pipe", "pipe", "pipe"],
+          env: process.env,
+        },
+      );
+
+      // Configure auth token for GitHub Packages
+      execSync(`npm config set //npm.pkg.github.com/:_authToken ${npmToken}`, {
+        stdio: ["pipe", "pipe", "pipe"],
+        env: process.env,
+      });
+
+      console.log("✅ npm authentication configured");
+    } catch (error) {
+      console.log(
+        `⚠️  Failed to configure npm authentication: ${error.message}`,
+      );
+      throw error; // This is critical, so we should fail if auth setup fails
     }
   }
 
@@ -144,6 +187,8 @@ class WidgetDependencyUpdater {
         encoding: "utf8",
         stdio: ["pipe", "pipe", "pipe"],
         timeout: 60000, // 60 second timeout
+        env: process.env,
+        cwd: process.cwd(),
       });
 
       this.results.updatedPackages.push({
