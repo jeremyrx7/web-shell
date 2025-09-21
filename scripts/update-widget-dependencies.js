@@ -179,8 +179,8 @@ class WidgetDependencyUpdater {
     console.log(`\n📦 Installing ${name}@${version}`);
 
     try {
-      // Run npm install for this specific package
-      const command = `npm install ${name}@${version} --save`;
+      // Run npm install for this specific package with --legacy-peer-deps to handle version conflicts
+      const command = `npm install ${name}@${version} --save --legacy-peer-deps`;
       console.log(`   🔄 Running: ${command}`);
 
       const result = execSync(command, {
