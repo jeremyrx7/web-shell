@@ -14,6 +14,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@heroicons/react": "^2.2.0",
     "@jeremyrx7/widget-core": "^1.18.0",
+    "@jeremyrx7/widget-sports-feed": "^1.1.0",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
     "axios": "^1.12.2",
