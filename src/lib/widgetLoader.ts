@@ -1,4 +1,14 @@
 // Widget types and utilities for dynamic loading
+//
+// This implementation uses CDN-first loading to avoid Turbopack dynamic import warnings
+// while still providing a robust widget loading system. For development with local packages,
+// widgets can be loaded via CDN or by manually registering import functions.
+
+// Development mode flag - can be set via environment variable
+const IS_DEVELOPMENT = process.env.NODE_ENV === "development";
+
+// Known widget packages configuration - populated at runtime
+const KNOWN_WIDGET_PACKAGES: Record<string, () => Promise<any>> = {};
 
 // Widget registry to store loaded widget components
 export class WidgetRegistry {
@@ -54,19 +64,60 @@ export class WidgetRegistry {
     const versionString = version || "latest";
 
     try {
-      // Try to load from node_modules first (for development)
-      try {
-        const widgetModule = await import(packageName);
-        return widgetModule.default || widgetModule;
-      } catch {
-        // Fall back to CDN loading
-        console.log(`Loading ${packageName} from CDN...`);
-        return await this.loadFromCDN(packageName, versionString);
+      // In development, try registered packages first, then fall back to CDN
+      if (IS_DEVELOPMENT && KNOWN_WIDGET_PACKAGES[packageName]) {
+        try {
+          const widgetModule = await KNOWN_WIDGET_PACKAGES[packageName]();
+          console.log(`Loaded ${packageName} from registered package`);
+          return widgetModule.default || widgetModule;
+        } catch (devError) {
+          console.warn(
+            `Failed to load ${packageName} from registered package, falling back to CDN:`,
+            devError,
+          );
+        }
       }
+
+      // Load from CDN - this avoids Turbopack dynamic import warnings
+      // and works reliably in both development and production
+      console.log(`Loading ${packageName} from CDN...`);
+      return await this.loadFromCDN(packageName, versionString);
     } catch (error) {
       console.error(`Failed to load widget ${packageName}:`, error);
       throw new Error(`Widget ${packageName} could not be loaded`);
     }
+  }
+
+  /**
+   * Register a widget package for local development loading
+   * This allows bypassing CDN loading for local development
+   *
+   * @example
+   * // In your development setup:
+   * WidgetRegistry.registerWidgetPackage('@jeremyrx7/widget-core', () => import('@jeremyrx7/widget-core'));
+   */
+  static registerWidgetPackage(
+    packageName: string,
+    importFunction: () => Promise<any>,
+  ): void {
+    KNOWN_WIDGET_PACKAGES[packageName] = importFunction;
+    console.log(`Registered widget package for development: ${packageName}`);
+  }
+
+  /**
+   * Get list of registered development packages
+   */
+  static getRegisteredPackages(): string[] {
+    return Object.keys(KNOWN_WIDGET_PACKAGES);
+  }
+
+  /**
+   * Clear all registered packages (useful for testing)
+   */
+  static clearRegisteredPackages(): void {
+    Object.keys(KNOWN_WIDGET_PACKAGES).forEach((key) => {
+      delete KNOWN_WIDGET_PACKAGES[key];
+    });
   }
 
   /**
