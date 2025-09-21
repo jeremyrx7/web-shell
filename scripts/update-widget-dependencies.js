@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-const fs = require('fs').promises;
-const path = require('path');
-const { execSync } = require('child_process');
+const fs = require("fs").promises;
+const path = require("path");
+const { execSync } = require("child_process");
 
 /**
  * Script to update widget dependencies in package.json
@@ -12,12 +12,12 @@ const { execSync } = require('child_process');
 
 class WidgetDependencyUpdater {
   constructor() {
-    this.packageJsonPath = path.join(process.cwd(), 'package.json');
+    this.packageJsonPath = path.join(process.cwd(), "package.json");
     this.results = {
       hasChanges: false,
       updatedPackages: [],
       errors: [],
-      summary: {}
+      summary: {},
     };
   }
 
@@ -28,14 +28,14 @@ class WidgetDependencyUpdater {
     try {
       // Get input data from environment variables
       const packagesToUpdate = this.getPackagesToUpdate();
-      const forceUpdate = process.env.FORCE_UPDATE === 'true';
+      const forceUpdate = process.env.FORCE_UPDATE === "true";
 
-      console.log('🔄 Widget Dependency Updater Starting...');
+      console.log("🔄 Widget Dependency Updater Starting...");
       console.log(`📦 Packages to process: ${packagesToUpdate.length}`);
       console.log(`🔧 Force update: ${forceUpdate}`);
 
       if (packagesToUpdate.length === 0) {
-        console.log('ℹ️  No packages to update');
+        console.log("ℹ️  No packages to update");
         this.outputResults();
         return;
       }
@@ -50,26 +50,33 @@ class WidgetDependencyUpdater {
       }
 
       // Compare and save if changes were made
-      const hasChanges = this.hasPackageChanges(originalDependencies, currentPackageJson.dependencies);
+      const hasChanges = this.hasPackageChanges(
+        originalDependencies,
+        currentPackageJson.dependencies,
+      );
 
       if (hasChanges || forceUpdate) {
         await this.savePackageJson(currentPackageJson);
         await this.updateLockFile();
         this.results.hasChanges = true;
-        console.log('✅ Package.json updated successfully');
+        console.log("✅ Package.json updated successfully");
       } else {
-        console.log('ℹ️  No changes needed - all packages are already up to date');
+        console.log(
+          "ℹ️  No changes needed - all packages are already up to date",
+        );
       }
 
-      this.generateSummary(originalDependencies, currentPackageJson.dependencies);
+      this.generateSummary(
+        originalDependencies,
+        currentPackageJson.dependencies,
+      );
       this.outputResults();
-
     } catch (error) {
-      console.error('❌ Fatal error:', error.message);
+      console.error("❌ Fatal error:", error.message);
       this.results.errors.push({
-        type: 'fatal',
+        type: "fatal",
         message: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       this.outputResults();
       process.exit(1);
@@ -80,13 +87,16 @@ class WidgetDependencyUpdater {
    * Get packages to update from environment variables
    */
   getPackagesToUpdate() {
-    const packagesEnv = process.env.PACKAGES_TO_UPDATE || '[]';
+    const packagesEnv = process.env.PACKAGES_TO_UPDATE || "[]";
 
     try {
+      console.log("env", process.env.PACKAGES_TO_UPDATE);
       const packages = JSON.parse(packagesEnv);
+      console.log(packages);
       return Array.isArray(packages) ? packages : [];
     } catch (error) {
-      console.warn('⚠️  Failed to parse PACKAGES_TO_UPDATE, using empty array');
+      console.error(error);
+      console.warn("⚠️  Failed to parse PACKAGES_TO_UPDATE, using empty array");
       return [];
     }
   }
@@ -96,7 +106,7 @@ class WidgetDependencyUpdater {
    */
   async readPackageJson() {
     try {
-      const content = await fs.readFile(this.packageJsonPath, 'utf8');
+      const content = await fs.readFile(this.packageJsonPath, "utf8");
       return JSON.parse(content);
     } catch (error) {
       throw new Error(`Failed to read package.json: ${error.message}`);
@@ -108,8 +118,8 @@ class WidgetDependencyUpdater {
    */
   async savePackageJson(packageJson) {
     try {
-      const content = JSON.stringify(packageJson, null, 2) + '\n';
-      await fs.writeFile(this.packageJsonPath, content, 'utf8');
+      const content = JSON.stringify(packageJson, null, 2) + "\n";
+      await fs.writeFile(this.packageJsonPath, content, "utf8");
     } catch (error) {
       throw new Error(`Failed to save package.json: ${error.message}`);
     }
@@ -123,7 +133,7 @@ class WidgetDependencyUpdater {
     const currentVersion = packageJson.dependencies?.[name];
 
     console.log(`\n📦 Processing ${name}`);
-    console.log(`   Current: ${currentVersion || 'not installed'}`);
+    console.log(`   Current: ${currentVersion || "not installed"}`);
     console.log(`   Target:  ${version}`);
 
     // Check if update is needed
@@ -153,16 +163,17 @@ class WidgetDependencyUpdater {
         name,
         oldVersion: oldVersion || null,
         newVersion: version,
-        action: oldVersion ? 'updated' : 'added'
+        action: oldVersion ? "updated" : "added",
       });
 
-      console.log(`   ✅ Updated ${name}: ${oldVersion || 'none'} → ${version}`);
-
+      console.log(
+        `   ✅ Updated ${name}: ${oldVersion || "none"} → ${version}`,
+      );
     } catch (error) {
       const errorInfo = {
         package: name,
         version,
-        message: error.message
+        message: error.message,
       };
 
       this.results.errors.push(errorInfo);
@@ -177,15 +188,18 @@ class WidgetDependencyUpdater {
     try {
       const command = `npm view ${name}@${version} version --silent`;
       const result = execSync(command, {
-        encoding: 'utf8',
-        stdio: ['pipe', 'pipe', 'pipe']
+        encoding: "utf8",
+        stdio: ["pipe", "pipe", "pipe"],
       }).trim();
 
       if (result !== version) {
         throw new Error(`Version mismatch: expected ${version}, got ${result}`);
       }
     } catch (error) {
-      if (error.message.includes('404') || error.message.includes('Not Found')) {
+      if (
+        error.message.includes("404") ||
+        error.message.includes("Not Found")
+      ) {
         throw new Error(`Package ${name}@${version} not found in registry`);
       }
       throw new Error(`Package verification failed: ${error.message}`);
@@ -197,16 +211,16 @@ class WidgetDependencyUpdater {
    */
   async updateLockFile() {
     try {
-      console.log('\n🔄 Updating package-lock.json...');
-      execSync('npm install --package-lock-only', {
-        stdio: ['pipe', 'pipe', 'pipe'],
-        encoding: 'utf8'
+      console.log("\n🔄 Updating package-lock.json...");
+      execSync("npm install --package-lock-only", {
+        stdio: ["pipe", "pipe", "pipe"],
+        encoding: "utf8",
       });
-      console.log('✅ package-lock.json updated');
+      console.log("✅ package-lock.json updated");
     } catch (error) {
       const errorInfo = {
-        type: 'lockfile',
-        message: `Failed to update package-lock.json: ${error.message}`
+        type: "lockfile",
+        message: `Failed to update package-lock.json: ${error.message}`,
       };
       this.results.errors.push(errorInfo);
       console.log(`⚠️  Failed to update package-lock.json: ${error.message}`);
@@ -240,15 +254,16 @@ class WidgetDependencyUpdater {
    */
   generateSummary(originalDeps, currentDeps) {
     this.results.summary = {
-      totalPackagesProcessed: this.results.updatedPackages.length + this.results.errors.length,
+      totalPackagesProcessed:
+        this.results.updatedPackages.length + this.results.errors.length,
       successfulUpdates: this.results.updatedPackages.length,
       failedUpdates: this.results.errors.length,
       hasChanges: this.results.hasChanges,
-      updatedPackages: this.results.updatedPackages.map(pkg => ({
+      updatedPackages: this.results.updatedPackages.map((pkg) => ({
         name: pkg.name,
-        change: `${pkg.oldVersion || 'none'} → ${pkg.newVersion}`,
-        action: pkg.action
-      }))
+        change: `${pkg.oldVersion || "none"} → ${pkg.newVersion}`,
+        action: pkg.action,
+      })),
     };
   }
 
@@ -258,10 +273,10 @@ class WidgetDependencyUpdater {
   outputResults() {
     // Output for GitHub Actions step outputs
     const outputs = {
-      'has-changes': this.results.hasChanges.toString(),
-      'updated-packages': JSON.stringify(this.results.updatedPackages),
-      'errors': JSON.stringify(this.results.errors),
-      'summary': JSON.stringify(this.results.summary)
+      "has-changes": this.results.hasChanges.toString(),
+      "updated-packages": JSON.stringify(this.results.updatedPackages),
+      errors: JSON.stringify(this.results.errors),
+      summary: JSON.stringify(this.results.summary),
     };
 
     // Write to GitHub Actions outputs
@@ -272,30 +287,36 @@ class WidgetDependencyUpdater {
     // Also write to environment file if available
     const githubOutput = process.env.GITHUB_OUTPUT;
     if (githubOutput) {
-      const fs = require('fs');
+      const fs = require("fs");
       for (const [key, value] of Object.entries(outputs)) {
         fs.appendFileSync(githubOutput, `${key}=${value}\n`);
       }
     }
 
     // Summary output for logs
-    console.log('\n📊 Update Summary:');
-    console.log(`   Total packages processed: ${this.results.summary.totalPackagesProcessed}`);
-    console.log(`   Successful updates: ${this.results.summary.successfulUpdates}`);
+    console.log("\n📊 Update Summary:");
+    console.log(
+      `   Total packages processed: ${this.results.summary.totalPackagesProcessed}`,
+    );
+    console.log(
+      `   Successful updates: ${this.results.summary.successfulUpdates}`,
+    );
     console.log(`   Failed updates: ${this.results.summary.failedUpdates}`);
     console.log(`   Has changes: ${this.results.hasChanges}`);
 
     if (this.results.updatedPackages.length > 0) {
-      console.log('\n✅ Successfully Updated Packages:');
-      this.results.updatedPackages.forEach(pkg => {
-        console.log(`   - ${pkg.name}: ${pkg.oldVersion || 'none'} → ${pkg.newVersion} (${pkg.action})`);
+      console.log("\n✅ Successfully Updated Packages:");
+      this.results.updatedPackages.forEach((pkg) => {
+        console.log(
+          `   - ${pkg.name}: ${pkg.oldVersion || "none"} → ${pkg.newVersion} (${pkg.action})`,
+        );
       });
     }
 
     if (this.results.errors.length > 0) {
-      console.log('\n❌ Errors:');
-      this.results.errors.forEach(error => {
-        console.log(`   - ${error.package || 'General'}: ${error.message}`);
+      console.log("\n❌ Errors:");
+      this.results.errors.forEach((error) => {
+        console.log(`   - ${error.package || "General"}: ${error.message}`);
       });
     }
   }
@@ -304,8 +325,8 @@ class WidgetDependencyUpdater {
 // Run the updater if this script is executed directly
 if (require.main === module) {
   const updater = new WidgetDependencyUpdater();
-  updater.run().catch(error => {
-    console.error('Script execution failed:', error);
+  updater.run().catch((error) => {
+    console.error("Script execution failed:", error);
     process.exit(1);
   });
 }
