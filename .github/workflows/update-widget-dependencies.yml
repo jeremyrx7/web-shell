@@ -34,7 +34,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN_PAT }}
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -94,7 +94,7 @@ jobs:
         if: steps.update-deps.outputs.has-changes == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN_PAT }}
           commit-message: |
             🔄 Update widget dependencies to ${{ steps.extract-packages.outputs.new-version }}
 
