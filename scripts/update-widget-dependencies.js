@@ -36,6 +36,11 @@ class WidgetDependencyUpdater {
 
       if (packagesToUpdate.length === 0) {
         console.log("ℹ️  No packages to update");
+        console.log("   This could be due to:");
+        console.log("   - No packages were published");
+        console.log("   - Invalid JSON data from GitHub Actions");
+        console.log("   - JSON parsing failed (check raw data above)");
+        console.log("   - All packages are already up to date");
         this.outputResults();
         return;
       }
@@ -89,14 +94,27 @@ class WidgetDependencyUpdater {
   getPackagesToUpdate() {
     const packagesEnv = process.env.PACKAGES_TO_UPDATE || "[]";
 
+    console.log(`🔍 Raw PACKAGES_TO_UPDATE: "${packagesEnv}"`);
+    console.log(`🔍 Type: ${typeof packagesEnv}`);
+    console.log(`🔍 Length: ${packagesEnv.length}`);
+
     try {
-      console.log("env", process.env.PACKAGES_TO_UPDATE);
       const packages = JSON.parse(packagesEnv);
-      console.log(packages);
-      return Array.isArray(packages) ? packages : [];
+      console.log(
+        `✅ Parsed packages successfully: ${JSON.stringify(packages, null, 2)}`,
+      );
+
+      if (!Array.isArray(packages)) {
+        console.warn("⚠️  Parsed data is not an array, converting to array");
+        return packages ? [packages] : [];
+      }
+
+      return packages;
     } catch (error) {
-      console.error(error);
-      console.warn("⚠️  Failed to parse PACKAGES_TO_UPDATE, using empty array");
+      console.error("❌ Failed to parse PACKAGES_TO_UPDATE");
+      console.error(`   Raw value: "${packagesEnv}"`);
+      console.error(`   Error: ${error.message}`);
+      console.error("   Using empty array as fallback");
       return [];
     }
   }

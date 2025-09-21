@@ -52,10 +52,14 @@ jobs:
         id: extract-packages
         run: |
           if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
-            PACKAGES='${{ github.event.client_payload.published_packages }}'
-            NEW_VERSION='${{ github.event.client_payload.new_version }}'
-            SOURCE_REPO='${{ github.event.client_payload.source_repo }}'
-            WORKFLOW_RUN_URL='${{ github.event.client_payload.workflow_run_url }}'
+            # Get the entire client payload as JSON
+            CLIENT_PAYLOAD='${{ toJSON(github.event.client_payload) }}'
+
+            # Extract individual fields using jq
+            PACKAGES=$(echo "$CLIENT_PAYLOAD" | jq -c '.published_packages // []')
+            NEW_VERSION=$(echo "$CLIENT_PAYLOAD" | jq -r '.new_version // "unknown"')
+            SOURCE_REPO=$(echo "$CLIENT_PAYLOAD" | jq -r '.source_repo // "unknown"')
+            WORKFLOW_RUN_URL=$(echo "$CLIENT_PAYLOAD" | jq -r '.workflow_run_url // ""')
           else
             PACKAGES='${{ github.event.inputs.packages }}'
             NEW_VERSION="manual-update"
@@ -68,8 +72,14 @@ jobs:
           echo "source-repo=$SOURCE_REPO" >> $GITHUB_OUTPUT
           echo "workflow-run-url=$WORKFLOW_RUN_URL" >> $GITHUB_OUTPUT
 
+          echo "=== DEBUG: Package Information ==="
+          echo "Event name: ${{ github.event_name }}"
           echo "Packages to update: $PACKAGES"
           echo "New version: $NEW_VERSION"
+          echo "Source repo: $SOURCE_REPO"
+          echo "Workflow URL: $WORKFLOW_RUN_URL"
+          echo "Raw client_payload: ${{ toJSON(github.event.client_payload) }}"
+          echo "=================================="
 
       - name: Update package.json dependencies
         id: update-deps
