@@ -10,11 +10,11 @@ on:
   workflow_dispatch:
     inputs:
       packages:
-        description: 'Packages to update (JSON format)'
+        description: "Packages to update (JSON format)"
         required: true
-        default: '[]'
+        default: "[]"
       force_update:
-        description: 'Force update even if no changes detected'
+        description: "Force update even if no changes detected"
         type: boolean
         default: false
 
@@ -73,45 +73,11 @@ jobs:
 
       - name: Update package.json dependencies
         id: update-deps
+        env:
+          PACKAGES_TO_UPDATE: ${{ steps.extract-packages.outputs.packages }}
+          FORCE_UPDATE: ${{ github.event.inputs.force_update || 'false' }}
         run: |
-          PACKAGES='${{ steps.extract-packages.outputs.packages }}'
-          UPDATED_PACKAGES=""
-          HAS_CHANGES=false
-
-          if [ "$PACKAGES" != "[]" ] && [ "$PACKAGES" != "" ]; then
-            echo "Updating packages..."
-
-            # Parse packages and update each one
-            echo "$PACKAGES" | jq -r '.[] | "\(.name)@\(.version)"' | while read -r package; do
-              if [ -n "$package" ]; then
-                echo "Updating $package..."
-                npm install "$package" --save
-
-                if [ $? -eq 0 ]; then
-                  UPDATED_PACKAGES="$UPDATED_PACKAGES $package"
-                  HAS_CHANGES=true
-                  echo "✅ Successfully updated $package"
-                else
-                  echo "❌ Failed to update $package"
-                fi
-              fi
-            done
-
-            # Check if package.json was actually modified
-            if git diff --quiet package.json package-lock.json; then
-              echo "No changes detected in package.json or package-lock.json"
-              HAS_CHANGES=false
-            else
-              echo "Changes detected in package files"
-              HAS_CHANGES=true
-            fi
-          else
-            echo "No packages to update"
-            HAS_CHANGES=false
-          fi
-
-          echo "has-changes=$HAS_CHANGES" >> $GITHUB_OUTPUT
-          echo "updated-packages=$UPDATED_PACKAGES" >> $GITHUB_OUTPUT
+          node scripts/update-widget-dependencies.js
 
       - name: Create pull request
         if: steps.update-deps.outputs.has-changes == 'true'
@@ -129,7 +95,7 @@ jobs:
             This PR was automatically created in response to new widget package publications.
 
             ### 📦 Updated Packages
-            ${{ steps.extract-packages.outputs.packages && fromJson(steps.extract-packages.outputs.packages) && join(fromJson(steps.extract-packages.outputs.packages).*.name, ', ') || 'None specified' }}
+            ${{ steps.update-deps.outputs.summary && fromJson(steps.update-deps.outputs.summary).updatedPackages && join(fromJson(steps.update-deps.outputs.summary).updatedPackages.*.name, ', ') || 'None specified' }}
 
             ### 🔗 Source Information
             - **Source Repository:** ${{ steps.extract-packages.outputs.source-repo }}
@@ -137,6 +103,9 @@ jobs:
             ${{ steps.extract-packages.outputs.workflow-run-url && format('- **Workflow Run:** {0}', steps.extract-packages.outputs.workflow-run-url) || '' }}
 
             ### 📋 Changes Made
+            ${{ steps.update-deps.outputs.summary && fromJson(steps.update-deps.outputs.summary).updatedPackages && join(fromJson(steps.update-deps.outputs.summary).updatedPackages.*.change, '
+            - ') || 'No changes made' }}
+
             - Updated widget package dependencies in `package.json`
             - Updated `package-lock.json` with new dependency resolution
 
@@ -170,15 +139,37 @@ jobs:
             echo "✅ **Status:** Dependencies updated and PR created" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "**Updated Packages:**" >> $GITHUB_STEP_SUMMARY
-            echo '${{ steps.extract-packages.outputs.packages }}' | jq -r '.[] | "- `\(.name)@\(.version)`"' >> $GITHUB_STEP_SUMMARY
+            echo '${{ steps.update-deps.outputs.updated-packages }}' | jq -r '.[] | "- `\(.name)`: \(.oldVersion || "none") → \(.newVersion) (\(.action))"' >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "**Actions Taken:**" >> $GITHUB_STEP_SUMMARY
             echo "- Updated package.json with new widget package versions" >> $GITHUB_STEP_SUMMARY
             echo "- Updated package-lock.json with new dependency resolution" >> $GITHUB_STEP_SUMMARY
             echo "- Created pull request for review and merge" >> $GITHUB_STEP_SUMMARY
+
+            # Show errors if any
+            ERRORS='${{ steps.update-deps.outputs.errors }}'
+            if [ "$ERRORS" != "[]" ] && [ "$ERRORS" != "" ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "**⚠️ Warnings/Errors:**" >> $GITHUB_STEP_SUMMARY
+              echo "$ERRORS" | jq -r '.[] | "- \(.package || "General"): \(.message)"' >> $GITHUB_STEP_SUMMARY
+            fi
           else
             echo "ℹ️ **Status:** No updates needed" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
+
+            SUMMARY='${{ steps.update-deps.outputs.summary }}'
+            if [ "$SUMMARY" != "" ]; then
+              TOTAL=$(echo "$SUMMARY" | jq -r '.totalPackagesProcessed // 0')
+              FAILED=$(echo "$SUMMARY" | jq -r '.failedUpdates // 0')
+
+              if [ "$TOTAL" -gt 0 ]; then
+                echo "**Processing Summary:**" >> $GITHUB_STEP_SUMMARY
+                echo "- Total packages processed: $TOTAL" >> $GITHUB_STEP_SUMMARY
+                echo "- Failed updates: $FAILED" >> $GITHUB_STEP_SUMMARY
+                echo "" >> $GITHUB_STEP_SUMMARY
+              fi
+            fi
+
             echo "Either no packages were provided for update, or the current versions are already up to date." >> $GITHUB_STEP_SUMMARY
           fi
 
