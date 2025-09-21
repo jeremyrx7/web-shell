@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import WidgetWrapper from "../../components/widgets/WidgetWrapper";
+import WidgetSportsFeed from "@jeremyrx7/widget-sports-feed";
 
 export default function HomePage() {
   const pathname = usePathname();
@@ -20,7 +21,7 @@ export default function HomePage() {
           console.error(`Failed to load widget at ${position}:`, err)
         }
       >
-        Test
+        <WidgetSportsFeed />
       </WidgetWrapper>
     </div>
   );
