@@ -1,25 +1,23 @@
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
-import { notFound } from 'next/navigation';
-import { ReactNode } from 'react';
-import { locales } from '../../../i18n';
-import Header from '@/components/layout/Header';
-import Sidebar from '@/components/layout/Sidebar';
-import Footer from '@/components/layout/Footer';
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
+import { notFound } from "next/navigation";
+import { ReactNode } from "react";
+import { locales } from "../../../i18n";
+import Header from "@/components/layout/Header";
+import Sidebar from "@/components/layout/Sidebar";
+import Footer from "@/components/layout/Footer";
 
 type Props = {
   children: ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 };
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-export default async function LocaleLayout({
-  children,
-  params: { locale }
-}: Props) {
+export default async function LocaleLayout({ children, params }: Props) {
+  const { locale } = await params;
   // Validate that the incoming `locale` parameter is valid
   if (!locales.includes(locale as any)) notFound();
 
@@ -39,9 +37,7 @@ export default async function LocaleLayout({
 
           {/* Main Content */}
           <main className="flex-1 ml-64 pt-16">
-            <div className="p-6">
-              {children}
-            </div>
+            <div className="p-6">{children}</div>
           </main>
         </div>
 
