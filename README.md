@@ -1,433 +1,702 @@
-# 🌊 Web Shell - Widget Integration Platform
+# Web Shell - NPM Widget Platform
 
-A powerful Next.js-based web application shell that seamlessly integrates widgets from the widget library. Built with TypeScript, Tailwind CSS, and modern web technologies.
+A sports betting website shell that dynamically loads React widgets from npm packages. Teams can develop, publish, and deploy widgets independently while maintaining a consistent user experience.
 
-## 🚀 Features
+## 🏗️ Architecture Overview
 
-- **🧩 Dynamic Widget Loading**: Load and render widgets from the widget library at runtime
-- **🌍 Multi-language Support**: Built-in internationalization with English and French
-- **🏗️ Island Architecture**: Dedicated widget placement areas with flexible layouts
-- **🎨 Theming System**: Consistent design system with light/dark mode support
-- **📱 Responsive Design**: Mobile-first approach with Tailwind CSS
-- **🔧 Strapi Integration**: Content management through Strapi CMS
-- **⚡ Performance Optimized**: Code splitting, lazy loading, and caching
-- **♿ Accessibility**: WCAG compliant with proper ARIA attributes
-- **🔒 Security**: Content Security Policy and input validation
+The Web Shell provides:
 
-## 🏗️ Architecture
+- **Layout Framework**: Sports betting themed navigation, responsive grid system
+- **Widget Loading System**: Dynamic import of widgets from npm packages
+- **Shared State Management**: Props passing and event handling between shell and widgets
+- **Consistent Styling**: Tailwind CSS design system and responsive breakpoints
 
-### Widget Islands
+## 🎯 How It Works
 
-The shell provides several predefined "islands" where widgets can be embedded:
+Instead of monolithic pages, the platform uses **WidgetWrapper** components that:
 
-- **Hero Section**: Main banner area for promotional content
-- **Features Grid**: Showcase product features with interactive widgets
-- **Testimonials**: Customer feedback and review widgets
-- **Full Page**: Entire pages dedicated to single widgets
+1. **Dynamically import** npm packages at runtime
+2. **Pass props** from shell to widget components
+3. **Handle loading/error states** gracefully
+4. **Cache components** for performance
 
-### Components Structure
-
-```
-src/
-├── app/
-│   ├── [locale]/           # Internationalized routes
-│   │   ├── layout.tsx      # Locale-specific layout
-│   │   ├── page.tsx        # Home page
-│   │   ├── widgets/        # Widget gallery
-│   │   └── islands/        # Widget island pages
-│   └── layout.tsx          # Root layout
-├── components/
-│   ├── layout/             # Header, sidebar, footer
-│   └── widgets/            # Widget-related components
-├── lib/
-│   ├── strapi.ts          # Strapi API client
-│   └── widgetLoader.ts    # Dynamic widget loading
-└── middleware.ts          # i18n routing
-```
-
-## 🛠️ Installation
-
-### Prerequisites
-
-- Node.js 18+
-- npm 9+
-- Strapi CMS instance (optional for development)
-
-### Setup
-
-1. **Clone the repository**
-
-   ```bash
-   git clone <repository-url>
-   cd web-shell
-   ```
-
-2. **Install dependencies**
-
-   ```bash
-   npm install
-   ```
-
-3. **Environment Configuration**
-
-   ```bash
-   cp .env.local.example .env.local
-   ```
-
-   Update the following variables:
-
-   ```env
-   STRAPI_API_URL=http://localhost:1337
-   STRAPI_API_TOKEN=your_strapi_token
-   WIDGET_LIBRARY_REGISTRY=https://npm.pkg.github.com
-   WIDGET_LIBRARY_TOKEN=your_github_token
-   ```
-
-4. **Start development server**
-
-   ```bash
-   npm run dev
-   ```
-
-5. **Open the application**
-   Visit [http://localhost:3000](http://localhost:3000)
-
-## 🌐 Internationalization
-
-The application supports multiple languages using `next-intl`:
-
-- **English (en)**: Default language
-- **French (fr)**: Secondary language
-
-### Adding New Languages
-
-1. Create translation files in `messages/`
-2. Add locale to `i18n.ts`
-3. Update middleware configuration
-4. Add language switcher option
-
-### Translation Structure
-
-```json
-{
-  "navigation": {
-    "home": "Home",
-    "widgets": "Widgets"
-  },
-  "widgets": {
-    "title": "Widget Gallery",
-    "loading": "Loading widget..."
-  }
-}
-```
-
-## 🧩 Widget Integration
-
-### Dynamic Widget Loading
-
-Widgets are loaded dynamically from the widget library using the `WidgetLoader`:
-
-```typescript
-import { WidgetRenderer } from '@/components/widgets/WidgetRenderer';
-
-<WidgetRenderer
-  widget={widgetConfig}
-  configuration={customConfig}
-  locale={currentLocale}
-  onError={handleError}
-  onLoad={handleLoad}
+```tsx
+<WidgetWrapper
+  packageName="@sportsbet/live-events"
+  widgetProps={{ locale, maxEvents: 10 }}
+  position="main-content"
+  onLoad={(pkg) => console.log(`${pkg} loaded`)}
 />
 ```
 
-### Widget Configuration
+## 🚀 Quick Start
 
-Each widget can be configured through Strapi or directly in code:
-
-```typescript
-const widgetConfig = {
-  name: "@widget-library/core",
-  version: "1.0.0",
-  configuration: {
-    title: "Welcome to Our Platform",
-    primaryCta: {
-      text: "Get Started",
-      url: "/signup",
-    },
-  },
-};
-```
-
-### Error Handling
-
-The shell provides comprehensive error handling for widget loading:
-
-- **Load Errors**: Widget package not found
-- **Config Errors**: Invalid configuration
-- **Runtime Errors**: Widget execution failures
-
-## 📊 Strapi CMS Integration
-
-### Content Types
-
-- **Widgets**: Widget definitions and configurations
-- **Pages**: Page layouts with widget assignments
-- **Widget Islands**: Island configurations and constraints
-
-### API Usage
-
-```typescript
-import { StrapiAPI } from "@/lib/strapi";
-
-// Get all widgets
-const widgets = await StrapiAPI.getWidgets(locale);
-
-// Get widget island
-const island = await StrapiAPI.getWidgetIsland("hero-section");
-
-// Update widget configuration
-await StrapiAPI.updateWidget(widgetId, newConfig);
-```
-
-## 🎨 Theming
-
-### Design System
-
-The shell uses a consistent design system based on Tailwind CSS:
-
-```typescript
-const theme = {
-  colors: {
-    primary: "#3B82F6",
-    secondary: "#6B7280",
-    background: "#FFFFFF",
-    surface: "#F9FAFB",
-  },
-  spacing: {
-    xs: "0.25rem",
-    sm: "0.5rem",
-    md: "1rem",
-    lg: "1.5rem",
-  },
-};
-```
-
-### Custom Styling
-
-Override widget styles using CSS variables:
-
-```css
-:root {
-  --widget-primary-color: #your-color;
-  --widget-border-radius: 8px;
-}
-```
-
-## 🧪 Testing
-
-### Running Tests
+### Installation
 
 ```bash
-# Run all tests
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run tests with coverage
-npm run test:coverage
+git clone <repository>
+cd web-shell
+npm install
+npm run dev
 ```
 
-### Test Structure
+Visit `http://localhost:3000` to see the platform.
+
+### Project Structure
 
 ```
 src/
+├── app/[locale]/              # Next.js pages with widget slots
+│   ├── page.tsx              # Home page (12 widget slots)
+│   ├── details/page.tsx      # Details page (7 widget slots)
+│   └── layout.tsx            # Root layout with navigation
 ├── components/
-│   └── __tests__/          # Component tests
-├── lib/
-│   └── __tests__/          # Utility tests
-└── __tests__/              # Integration tests
+│   ├── layout/               # Navigation, header, sidebar
+│   └── widgets/
+│       └── WidgetWrapper.tsx # Core widget loading component
+└── i18n/                     # Multi-language support
 ```
 
-### Widget Testing
+## 📦 Widget Development Guide
 
-Mock widgets for testing:
-
-```typescript
-jest.mock("@/lib/widgetLoader", () => ({
-  loadWidget: jest.fn().mockResolvedValue(MockWidget),
-}));
-```
-
-## 📦 Build & Deployment
-
-### Development Build
+### 1. Create Your Widget Package
 
 ```bash
-npm run build
-npm start
+mkdir my-live-events-widget
+cd my-live-events-widget
+npm init -y
 ```
 
-### Production Deployment
+```json
+// package.json
+{
+  "name": "@sportsbet/live-events",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  }
+}
+```
 
-The application is optimized for deployment on Vercel:
+### 2. Build Your Widget Component
 
-1. **Connect your repository** to Vercel
-2. **Set environment variables** in Vercel dashboard
-3. **Deploy automatically** on push to main branch
+```tsx
+// src/LiveEventsWidget.tsx
+import React from "react";
+
+interface LiveEventsProps {
+  locale: string;
+  maxEvents: number;
+  autoRefresh?: boolean;
+  sports: string[];
+  onEventClick?: (eventId: string) => void;
+}
+
+const LiveEventsWidget: React.FC<LiveEventsProps> = ({
+  locale,
+  maxEvents,
+  autoRefresh = true,
+  sports,
+  onEventClick,
+}) => {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Live Events</h2>
+        {autoRefresh && (
+          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+        )}
+      </div>
+
+      {/* Your widget UI here */}
+      <div className="grid gap-3">{/* Event items */}</div>
+    </div>
+  );
+};
+
+export default LiveEventsWidget;
+```
+
+### 3. Export Your Widget
+
+```tsx
+// src/index.ts
+export { default } from "./LiveEventsWidget";
+export type { LiveEventsProps } from "./LiveEventsWidget";
+```
+
+### 4. Build and Publish
+
+```bash
+# Build your widget
+npm run build
+
+# Publish to npm
+npm publish --access public
+```
+
+### 5. Use in Web Shell
+
+```tsx
+// In web-shell pages
+<WidgetWrapper
+  packageName="@sportsbet/live-events"
+  version="1.0.0"
+  widgetProps={{
+    locale,
+    maxEvents: 10,
+    autoRefresh: true,
+    sports: ["football", "basketball"],
+    onEventClick: (eventId) => console.log("Event clicked:", eventId),
+  }}
+/>
+```
+
+## 🎨 Widget Design Guidelines
+
+### Styling Standards
+
+Use Tailwind CSS classes for consistent styling:
+
+```tsx
+// Good: Use design system colors
+<div className="bg-white border border-gray-200 rounded-lg p-4">
+  <h3 className="text-lg font-semibold text-gray-900 mb-2">Title</h3>
+  <p className="text-gray-600">Description</p>
+</div>
+
+// Good: Responsive design
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  {/* Content */}
+</div>
+```
+
+### Color Palette
+
+```css
+Primary: #2563eb (blue-600)
+Success: #16a34a (green-600)
+Warning: #ca8a04 (yellow-600)
+Error: #dc2626 (red-600)
+Gray: #374151 to #f9fafb
+```
+
+### Interactive Elements
+
+```tsx
+// Buttons
+<button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+  Place Bet
+</button>
+
+// Cards
+<div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+  {/* Card content */}
+</div>
+```
+
+## 📍 Available Widget Slots
+
+### Home Page (`/`)
+
+| Position           | Package Example              | Props                                   |
+| ------------------ | ---------------------------- | --------------------------------------- |
+| `hero`             | `@sportsbet/hero-banner`     | `{ locale, showSignupButton }`          |
+| `live-events`      | `@sportsbet/live-events`     | `{ locale, maxEvents, sports[] }`       |
+| `bet-slip`         | `@sportsbet/bet-slip`        | `{ locale, userId, currency }`          |
+| `sports-grid-*`    | `@sportsbet/sports-category` | `{ sport, icon, eventCount }`           |
+| `todays-matches`   | `@sportsbet/match-schedule`  | `{ locale, date, maxMatches }`          |
+| `featured-matches` | `@sportsbet/featured-events` | `{ locale, maxEvents, priority }`       |
+| `promotions`       | `@sportsbet/promotions`      | `{ locale, userId, currency }`          |
+| `casino-games`     | `@sportsbet/casino-preview`  | `{ locale, maxGames, gameTypes[] }`     |
+| `virtual-sports`   | `@sportsbet/virtual-sports`  | `{ locale, games[], showNextRace }`     |
+| `news-feed`        | `@sportsbet/news-feed`       | `{ locale, maxArticles, categories[] }` |
+| `stats-footer`     | `@sportsbet/stats-bar`       | `{ locale, showUserCount, currency }`   |
+
+### Details Page (`/details`)
+
+| Position        | Package Example                 | Props                             |
+| --------------- | ------------------------------- | --------------------------------- |
+| `primary`       | `@sportsbet/details-hero`       | `{ locale, showBreadcrumb }`      |
+| `grid-left`     | `@sportsbet/stats-widget`       | `{ locale, layout, showTrends }`  |
+| `grid-right`    | `@sportsbet/quick-stats`        | `{ locale, format, animate }`     |
+| `detailed-info` | `@sportsbet/detailed-info`      | `{ locale, showExpandable }`      |
+| `sidebar-*`     | `@sportsbet/sidebar-info`       | `{ locale, type, compact }`       |
+| `bottom-full`   | `@sportsbet/additional-details` | `{ locale, layout, showActions }` |
+
+## 🔄 Widget Loading Methods
+
+### Method 1: Node Modules (Recommended)
+
+```bash
+# Install widget in web-shell
+cd web-shell
+npm install @sportsbet/live-events
+```
+
+The WidgetWrapper will automatically import from `node_modules`.
+
+### Method 2: Widget Registry
+
+Set environment variable:
+
+```bash
+NEXT_PUBLIC_WIDGET_REGISTRY_URL=https://widgets.yourcompany.com
+```
+
+Widgets are fetched from your registry at runtime.
+
+### Method 3: CDN Loading
+
+```bash
+NEXT_PUBLIC_WIDGET_CDN_URL=https://unpkg.com
+```
+
+Load widgets directly from CDN (e.g., unpkg.com).
+
+## 📱 Responsive Design
+
+All widgets must be mobile-responsive:
+
+```tsx
+const MyWidget = () => (
+  <div className="p-4">
+    {/* Mobile: Stack vertically */}
+    <div className="space-y-4 md:space-y-0 md:space-x-4 md:flex md:items-center">
+      <div className="flex-1">
+        <h3 className="text-base md:text-lg font-semibold">Title</h3>
+        <p className="text-sm md:text-base text-gray-600">Description</p>
+      </div>
+      <button className="w-full md:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg">
+        Action
+      </button>
+    </div>
+  </div>
+);
+```
+
+## 🔧 Advanced Widget Features
+
+### State Management
+
+```tsx
+// Widget with internal state
+const LiveEventsWidget = ({ maxEvents, onEventClick }) => {
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchLiveEvents()
+      .then(setEvents)
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <SkeletonLoader />;
+
+  return (
+    <div>
+      {events.slice(0, maxEvents).map((event) => (
+        <EventCard
+          key={event.id}
+          event={event}
+          onClick={() => onEventClick(event.id)}
+        />
+      ))}
+    </div>
+  );
+};
+```
+
+### Error Boundaries
+
+```tsx
+// Widgets are automatically wrapped in error boundaries
+const MyWidget = () => {
+  if (someError) {
+    throw new Error("Widget failed to render");
+  }
+
+  return <div>Widget content</div>;
+};
+```
+
+### Loading States
+
+```tsx
+// Show loading while data fetches
+import useSWR from "swr";
+
+const MyWidget = () => {
+  const { data, error, isLoading } = useSWR("/api/widget-data", fetcher);
+
+  if (isLoading)
+    return <div className="animate-pulse bg-gray-200 h-32 rounded" />;
+  if (error) return <div className="text-red-600">Error loading data</div>;
+
+  return <div>{/* Widget content with data */}</div>;
+};
+```
+
+## 🧪 Testing Widgets
+
+### Unit Testing
+
+```tsx
+// MyWidget.test.tsx
+import { render, screen } from "@testing-library/react";
+import MyWidget from "./MyWidget";
+
+describe("MyWidget", () => {
+  it("renders with props", () => {
+    render(<MyWidget locale="en" maxItems={5} />);
+    expect(screen.getByText("Widget Title")).toBeInTheDocument();
+  });
+
+  it("handles click events", async () => {
+    const onClickMock = jest.fn();
+    render(<MyWidget onItemClick={onClickMock} />);
+
+    // Test interactions
+  });
+});
+```
+
+### Integration Testing
+
+```tsx
+// Test widget in web-shell context
+describe("Widget Integration", () => {
+  it("loads widget from package", async () => {
+    render(
+      <WidgetWrapper
+        packageName="@sportsbet/my-widget"
+        widgetProps={{ locale: "en" }}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("widget-content")).toBeInTheDocument();
+    });
+  });
+});
+```
+
+## 🚀 Deployment
+
+### Widget Deployment
+
+1. **Build and test** your widget
+2. **Update version** in package.json
+3. **Publish to npm**
+4. **Update web-shell** dependency
+5. **Deploy web-shell**
+
+```bash
+# In widget repository
+npm version patch
+npm publish
+
+# In web-shell repository
+npm update @sportsbet/my-widget
+npm run build
+# Deploy to production
+```
 
 ### Environment Variables
 
-Required for production:
-
-```env
-STRAPI_API_URL=https://your-strapi.com
-STRAPI_API_TOKEN=production_token
-WIDGET_LIBRARY_REGISTRY=https://npm.pkg.github.com
-WIDGET_LIBRARY_TOKEN=production_token
-NEXTAUTH_URL=https://your-app.com
-NEXTAUTH_SECRET=production_secret
+```bash
+# .env.local
+NEXT_PUBLIC_API_BASE_URL=https://api.sportsbet.com
+NEXT_PUBLIC_WIDGET_REGISTRY_URL=https://widgets.sportsbet.com
+NEXT_PUBLIC_CDN_URL=https://cdn.sportsbet.com
 ```
 
-## 🔧 Configuration
-
-### Next.js Configuration
-
-Key configuration in `next.config.ts`:
+### Build Optimization
 
 ```typescript
-{
+// next.config.ts
+module.exports = {
   transpilePackages: [
-    '@widget-library/core'
+    "@sportsbet/live-events",
+    "@sportsbet/bet-slip",
+    // Add your widget packages here
   ],
-  images: {
-    domains: ['your-strapi-domain.com']
-  }
-}
+  experimental: {
+    optimizeCss: true,
+  },
+};
 ```
 
-### Widget Security
+## 🐛 Debugging
 
-Content Security Policy for widgets:
-
-```typescript
-{
-  headers: {
-    'Content-Security-Policy': `
-      default-src 'self';
-      script-src 'self' 'unsafe-eval' *.unpkg.com;
-      style-src 'self' 'unsafe-inline';
-      img-src 'self' data: https:;
-    `
-  }
-}
-```
-
-## 🔄 Widget Updates
-
-### Automated Updates
-
-When widgets are published, GitHub Actions automatically:
-
-1. Creates a PR with updated dependencies
-2. Generates preview deployment
-3. Notifies team for review
-
-### Manual Updates
+### Widget Debug Mode
 
 ```bash
-# Update specific widget
-npm install @widget-library/core@latest
-
-# Update all widgets
-npm update @widget-library/*
+# Enable debug logging
+localStorage.setItem('widget-debug', 'true');
 ```
-
-## 🐛 Troubleshooting
 
 ### Common Issues
 
-**Widget not loading:**
+1. **Widget Not Loading**
 
-- Check package is published to registry
-- Verify configuration is valid
-- Check browser console for errors
+   ```bash
+   # Check if package is installed
+   npm ls @sportsbet/my-widget
 
-**Build failures:**
+   # Check console for import errors
+   # Verify package exports default component
+   ```
 
-- Ensure all widget packages are in `transpilePackages`
-- Check TypeScript compatibility
-- Verify peer dependencies
+2. **Props Not Received**
 
-**Performance issues:**
+   ```tsx
+   // Add prop debugging
+   const MyWidget = (props) => {
+     console.log("Widget props:", props);
+     return <div>{/* widget */}</div>;
+   };
+   ```
 
-- Enable lazy loading for widgets
-- Check bundle analyzer for large dependencies
-- Use React.memo for heavy components
+3. **Styling Issues**
+   ```tsx
+   // Ensure Tailwind classes are available
+   // Check for CSS conflicts
+   // Verify responsive breakpoints work
+   ```
 
-### Debug Mode
+## 🤝 Team Workflow
 
-Enable debug logging:
+### Widget Development Process
 
-```env
-DEBUG=true
-NODE_ENV=development
+1. **Plan**: Define widget requirements and API contract
+2. **Develop**: Build widget with mock data and tests
+3. **Package**: Create npm package with proper exports
+4. **Publish**: Release to npm registry
+5. **Integrate**: Install in web-shell and test
+6. **Deploy**: Release web-shell with new widget
+
+### Version Management
+
+```json
+// Semantic versioning
+"1.0.0" // Major.Minor.Patch
+"^1.0.0" // Compatible changes
+"~1.0.0" // Patch changes only
+"1.0.0" // Exact version
 ```
 
-## 🤝 Contributing
+### Code Review Checklist
 
-### Development Workflow
-
-1. **Fork the repository**
-2. **Create feature branch**: `git checkout -b feature/amazing-feature`
-3. **Make changes** and add tests
-4. **Run tests**: `npm test`
-5. **Submit pull request**
-
-### Code Standards
-
-- **TypeScript**: Strict mode enabled
-- **ESLint**: Enforced code style
-- **Prettier**: Code formatting
-- **Tests**: Required for new features
+- [ ] Widget exports default React component
+- [ ] Props interface is properly typed
+- [ ] Responsive design implemented
+- [ ] Loading/error states handled
+- [ ] Tests cover main functionality
+- [ ] Documentation updated
 
 ## 📚 API Reference
 
-### WidgetRenderer Props
+### WidgetWrapper Props
 
-```typescript
-interface WidgetRendererProps {
-  widget: Widget;
-  configuration?: Record<string, any>;
-  locale?: string;
-  className?: string;
+```tsx
+interface WidgetWrapperProps {
+  packageName: string; // NPM package name
+  version?: string; // Package version (default: 'latest')
+  widgetProps?: Record<string, any>; // Props passed to widget
+  className?: string; // CSS classes for wrapper
+  minHeight?: string; // Minimum height class
+  position?: string; // Position identifier
+  pageType?: string; // Page context
+  fallback?: React.ComponentType; // Fallback component
+  onLoad?: (packageName: string) => void; // Load success callback
+  onError?: (error: Error, packageName: string) => void; // Error callback
+}
+```
+
+### Standard Widget Props
+
+All widgets receive these standard props:
+
+```tsx
+interface StandardWidgetProps {
+  locale: string; // Current language ('en', 'fr')
+  _internal?: {
+    // Internal shell data
+    packageName: string;
+    version: string;
+    position: string;
+    pageType: string;
+  };
+}
+```
+
+### Widget Event Handlers
+
+Common callback patterns:
+
+```tsx
+interface WidgetCallbacks {
+  onItemClick?: (itemId: string) => void;
   onError?: (error: Error) => void;
-  onLoad?: () => void;
+  onDataLoad?: (data: any) => void;
+  onUserAction?: (action: string, data: any) => void;
 }
 ```
 
-### Widget Island Props
+## 🔗 Useful Links
 
-```typescript
-interface WidgetIslandProps {
-  island: WidgetIsland;
-  editable?: boolean;
-  locale?: string;
-  onWidgetAdd?: (widget: Widget) => void;
-  onWidgetRemove?: (widgetId: number) => void;
-}
-```
+### Development
 
-## 📄 License
+- **Tailwind CSS**: https://tailwindcss.com/docs
+- **Next.js**: https://nextjs.org/docs
+- **React**: https://react.dev/
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### Testing
 
-## 🆘 Support
+- **Jest**: https://jestjs.io/docs
+- **React Testing Library**: https://testing-library.com/docs/react-testing-library/intro/
 
-- **Documentation**: [docs.yourapp.com](https://docs.yourapp.com)
-- **Issues**: [GitHub Issues](https://github.com/your-org/web-shell/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-org/web-shell/discussions)
-- **Email**: support@yourapp.com
+### Deployment
+
+- **NPM Publishing**: https://docs.npmjs.com/cli/v8/commands/npm-publish
+- **Vercel**: https://vercel.com/docs
+
+## 📞 Support
+
+### Getting Help
+
+- **Slack**: #web-shell-support
+- **Internal Wiki**: https://wiki.company.com/web-shell
+- **GitHub Issues**: Create issues for bugs or feature requests
+
+### Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/new-widget-slot`)
+3. Commit changes (`git commit -m 'Add new widget slot'`)
+4. Push to branch (`git push origin feature/new-widget-slot`)
+5. Create Pull Request
 
 ---
 
-Built with ❤️ by the Web Shell Team
+## 🎉 Example: Complete Widget Package
+
+Here's a complete example of a widget package:
+
+```tsx
+// @sportsbet/live-events/src/LiveEventsWidget.tsx
+import React, { useState, useEffect } from "react";
+
+export interface LiveEventsProps {
+  locale: string;
+  maxEvents?: number;
+  sports?: string[];
+  autoRefresh?: boolean;
+  onEventClick?: (eventId: string) => void;
+}
+
+const LiveEventsWidget: React.FC<LiveEventsProps> = ({
+  locale,
+  maxEvents = 5,
+  sports = ["football"],
+  autoRefresh = true,
+  onEventClick,
+}) => {
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchEvents();
+
+    if (autoRefresh) {
+      const interval = setInterval(fetchEvents, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [sports, autoRefresh]);
+
+  const fetchEvents = async () => {
+    try {
+      const response = await fetch(
+        `/api/live-events?sports=${sports.join(",")}&locale=${locale}`,
+      );
+      const data = await response.json();
+      setEvents(data.slice(0, maxEvents));
+    } catch (error) {
+      console.error("Failed to fetch live events:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-3">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="animate-pulse bg-gray-200 h-16 rounded-lg" />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {events.map((event) => (
+        <div
+          key={event.id}
+          className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+          onClick={() => onEventClick?.(event.id)}
+        >
+          <div className="flex items-center space-x-3">
+            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            <div>
+              <div className="font-semibold text-gray-900">{event.teams}</div>
+              <div className="text-sm text-gray-600">{event.league} • LIVE</div>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="font-bold text-lg text-gray-900">{event.score}</div>
+            <div className="text-sm text-green-600">{event.odds}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default LiveEventsWidget;
+```
+
+```json
+// @sportsbet/live-events/package.json
+{
+  "name": "@sportsbet/live-events",
+  "version": "1.0.0",
+  "description": "Live sports events widget for sports betting platform",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "rollup -c",
+    "test": "jest",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "rollup": "^3.0.0",
+    "typescript": "^5.0.0"
+  }
+}
+```
+
+This complete example shows how to create a production-ready widget package that integrates seamlessly with the Web Shell platform.
+
+Happy coding! 🚀

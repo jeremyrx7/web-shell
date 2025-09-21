@@ -1,41 +1,32 @@
-'use client';
+"use client";
 
-import { useTranslations } from 'next-intl';
+import Link from "next/link";
 
-const Footer = () => {
-  const t = useTranslations('layout');
-
+export default function Footer() {
   return (
-    <footer className="ml-64 bg-white border-t border-gray-200 mt-auto">
-      <div className="px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-500">
-            {t('footer')}
+    <footer className="bg-white border-t border-gray-200 mt-auto">
+      <div className="max-w-7xl mx-auto py-6 px-4 lg:px-6">
+        <div className="flex flex-col md:flex-row items-center justify-between">
+          <div className="flex items-center space-x-4 mb-4 md:mb-0">
+            <Link href="/" className="text-lg font-bold text-blue-600">
+              Web Shell
+            </Link>
+            <span className="text-sm text-gray-500">© 2025</span>
           </div>
-          <div className="flex items-center space-x-6">
-            <a
-              href="#"
-              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-            >
-              Privacy Policy
-            </a>
-            <a
-              href="#"
-              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-            >
-              Terms of Service
-            </a>
-            <a
-              href="#"
-              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-            >
-              Support
-            </a>
+
+          <div className="flex items-center space-x-6 text-sm text-gray-600">
+            <Link href="/privacy" className="hover:text-blue-600">
+              Privacy
+            </Link>
+            <Link href="/terms" className="hover:text-blue-600">
+              Terms
+            </Link>
+            <Link href="/contact" className="hover:text-blue-600">
+              Contact
+            </Link>
           </div>
         </div>
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}
